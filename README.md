@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/cervandus/acsm-to-pdf/releases/latest"><img src="https://img.shields.io/github/v/release/cervandus/acsm-to-pdf?label=versión&color=5e5ce6" alt="versión"></a>
+  <a href="https://github.com/cervandus/acsm-to-pdf/releases/latest"><img src="https://img.shields.io/github/v/release/cervandus/acsm-to-pdf?label=versi%C3%B3n&color=5e5ce6" alt="versión"></a>
   <a href="https://github.com/cervandus/acsm-to-pdf/releases"><img src="https://img.shields.io/github/downloads/cervandus/acsm-to-pdf/total?label=descargas&color=bf5af2" alt="descargas"></a>
 </p>
 
