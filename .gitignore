@@ -1,0 +1,20 @@
+# Autorizaciones de Adobe y ajustes: NUNCA se suben
+datos/
+**/cuenta adobe/
+activation.xml
+device.xml
+devicesalt
+*.der
+
+# Compilaciones
+build/
+dist/
+*.spec
+*.zip
+
+# Python
+__pycache__/
+*.pyc
+
+# Versiones sustituidas que solo existen en local
+_ANTERIOR*/

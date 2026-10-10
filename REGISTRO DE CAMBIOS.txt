@@ -1,0 +1,59 @@
+﻿===============================================================================
+
+                    R E G I S T R O   D E   C A M B I O S
+
+                                ACSM a PDF
+                     https://github.com/cervandus/acsm-to-pdf
+
+===============================================================================
+
+La versión más reciente va arriba. Cada versión dice qué cambia para quien la usa y qué cambia por dentro.
+
+
+###############################################################################
+#  1.2.0  ·  2026-10-11  ·  Primera versión pública
+###############################################################################
+
+QUÉ CAMBIA
+  Ya no hace falta Adobe Digital Editions en ningún momento: si el ordenador no tiene una autorización de Adobe que copiar, la app crea una anónima (sin cuenta) al convertir el primer libro y la guarda en la carpeta «datos».
+  Si el ordenador sí tiene Adobe Digital Editions autorizado, la app copia esa autorización, así puede abrir también los libros ya descargados con ADE.
+  Mensajes claros cuando un ticket ya se canjeó con otra autorización, cuando ha caducado o cuando no hay conexión.
+  En Ajustes, aviso para hacer copia de seguridad de la carpeta «datos»: los libros descargados con una autorización solo se abren con ella.
+
+QUÉ CAMBIA POR DENTRO
+  Autorización anónima con el código de DeACSM (createDeviceFile, createUser, signIn anónimo, activateDevice), emulando ADE 4.5.11.
+  Se corrige desde fuera un fallo de DeACSM 0.0.16: con número de serie aleatorio, makeSerial devolvía bytes y la autorización fallaba con «can't concat str to bytes».
+  La versión que se publica se construye sin carpeta «datos» y el script comprueba que el .zip no la contiene.
+
+
+###############################################################################
+#  1.1.0  ·  2026-10-11  ·  Versión portátil
+###############################################################################
+
+QUÉ CAMBIA
+  La app es portátil: se descomprime en cualquier ordenador con Windows 10 u 11 y funciona sin instalar nada, ni Adobe Digital Editions, ni Calibre, ni DeDRM.
+  El fondo de la app se tiñe con los colores de la portada del libro que se está convirtiendo, y el confeti final también.
+  En Ajustes se ve la versión, el estado de la autorización de Adobe y del motor de PDF.
+
+QUÉ CAMBIA POR DENTRO
+  El canje del .acsm lo hace la propia app con el código de DeACSM 0.0.16, en unos 4 segundos.
+  La protección la quita la propia app con el código de DeDRM 10.0.9.
+  El PDF lo crea una copia completa de Calibre 9.16 que va en la carpeta «calibre» y guarda su configuración en una carpeta temporal para no dejar rastro.
+  Adobe Digital Editions solo se usa como plan B, si el canje propio falla y el ordenador lo tiene instalado y autorizado.
+  Los ajustes se guardan en datos\ajustes.json, dentro de la carpeta de la app.
+
+
+###############################################################################
+#  1.0.0  ·  2026-10-11  ·  Primera versión (no publicada)
+###############################################################################
+
+QUÉ HACÍA
+  Ventana estilo iPhone en modo noche con aurora y cristal, portada del libro girando en 3D, candado que se abre y confeti al terminar.
+  Convertía un .acsm (o un EPUB o PDF protegido) en PDF de una vez: soltarlo en la ventana, elegirlo o abrirlo con doble clic.
+  PDF con la proporción de la portada del libro (14 cm de ancho), números de página y marcadores de capítulo; tamaños A4, A5 y lector de 6 pulgadas en Ajustes. Si el libro ya venía en PDF se guardaba tal cual.
+  Necesitaba Adobe Digital Editions, Calibre y el complemento DeDRM instalados en el ordenador.
+
+
+===============================================================================
+                              FIN DEL DOCUMENTO
+===============================================================================

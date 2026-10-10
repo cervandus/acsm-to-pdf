@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>ACSM a PDF</title>
+<style>
+:root{
+  --bg:#05060a; --ink:#f5f5f7; --mute:rgba(255,255,255,.6); --faint:rgba(255,255,255,.35);
+  --glass:rgba(255,255,255,.08); --edge:rgba(255,255,255,.14);
+  --blue:#0a84ff; --violet:#bf5af2; --indigo:#5e5ce6; --orange:#ff9f0a; --red:#ff453a; --green:#30d158;
+  --ease:cubic-bezier(.2,.9,.3,1.2);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI Variable Display","Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;border:0;color:inherit;background:none}
+
+/* aurora */
+.aur{position:fixed;inset:-40%;filter:blur(64px);opacity:.7;animation:drift 16s ease-in-out infinite alternate;transition:opacity .8s}
+.aur i{position:absolute;border-radius:50%;transition:background-color 1.4s ease}
+.aur i:nth-child(1){width:60%;height:50%;left:10%;top:15%;background-color:var(--a1,var(--indigo))}
+.aur i:nth-child(2){width:50%;height:45%;right:5%;top:35%;background-color:var(--a2,var(--violet))}
+.aur i:nth-child(3){width:55%;height:40%;left:20%;bottom:10%;background-color:var(--a3,var(--blue))}
+@keyframes drift{to{transform:rotate(25deg) scale(1.15)}}
+body.busy .aur{animation-duration:6s}
+body.error .aur i:nth-child(1),body.attn .aur i:nth-child(1){background-color:#7a2a00}
+
+/* barra superior */
+.top{position:fixed;top:0;left:0;right:0;height:56px;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+.top .ctl{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;transition:background .2s;position:relative;z-index:2}
+.top .ctl:hover{background:rgba(255,255,255,.2)}
+.top .ctl svg{width:14px;height:14px}
+.top .right{display:flex;gap:8px}
+.island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:112px;height:32px;background:#000;border-radius:20px;display:flex;align-items:center;gap:8px;padding:0 13px;font-size:12px;overflow:hidden;white-space:nowrap;transition:width .55s var(--ease),box-shadow .4s;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
+.island .ring{width:16px;height:16px;border-radius:50%;border:2px solid #333;border-top-color:var(--green);animation:spin 1s linear infinite;flex:none;opacity:0;transition:opacity .3s}
+.island .txt{opacity:0;transition:opacity .3s .15s;overflow:hidden;text-overflow:ellipsis}
+body.busy .island{width:196px}
+body.busy .island .ring,body.busy .island .txt{opacity:1}
+body.attn .island{box-shadow:0 0 0 1px var(--orange),0 0 24px rgba(255,159,10,.45)}
+body.attn .island .ring{border-top-color:var(--orange)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* contenido */
+.content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;padding:66px 22px 22px}
+.head{display:flex;align-items:flex-end;justify-content:space-between}
+h1{font-size:30px;font-weight:700;letter-spacing:-.025em}
+.sub{color:var(--mute);font-size:14px;margin-top:3px}
+.count{font-size:12px;font-weight:600;background:rgba(255,255,255,.16);border-radius:10px;padding:3px 9px;opacity:0;transform:scale(.6);transition:all .35s var(--ease);margin-bottom:6px}
+.count.on{opacity:1;transform:none}
+
+.glass{margin-top:20px;flex:1;border-radius:30px;background:var(--glass);backdrop-filter:blur(26px) saturate(160%);box-shadow:inset 0 0 0 1px var(--edge);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;position:relative;overflow:hidden;transition:box-shadow .3s,background .3s,transform .4s var(--ease)}
+.glass::before{content:"";position:absolute;inset:12px;border:2px dashed rgba(255,255,255,.18);border-radius:22px;opacity:0;transition:opacity .3s}
+body.idle .glass::before{opacity:1}
+body.drag .glass{background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 2px rgba(255,255,255,.5),0 0 60px rgba(191,90,242,.35);transform:scale(1.02)}
+body.drag .glass::before{border-color:rgba(255,255,255,.6)}
+body.idle .glass{cursor:pointer}
+
+/* libro */
+.bookwrap{perspective:700px}
+.book{width:132px;height:196px;border-radius:5px 12px 12px 5px;background:linear-gradient(145deg,#2c2c54,#1a1a2e);box-shadow:inset 6px 0 0 rgba(0,0,0,.35),0 26px 44px -14px rgba(0,0,0,.75);display:flex;flex-direction:column;justify-content:flex-end;padding:14px 13px;transform:rotateY(-18deg);animation:tilt 5.5s ease-in-out infinite;position:relative;overflow:hidden;transition:background .6s}
+@keyframes tilt{50%{transform:rotateY(10deg) translateY(-7px)}}
+body.drag .book{animation:none;transform:rotateY(0) translateY(-14px) scale(1.06);transition:transform .35s var(--ease)}
+.book b{font-size:14px;line-height:1.2;position:relative;z-index:2;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.book span{font-size:10.5px;color:var(--mute);margin-top:5px;position:relative;z-index:2}
+.book img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s}
+.book.cover img{opacity:1}
+.book.cover b,.book.cover span{opacity:0}
+.book.flip{animation:flip .9s var(--ease)}
+@keyframes flip{0%{transform:rotateY(-18deg)}45%{transform:rotateY(90deg) scale(.95)}100%{transform:rotateY(0)}}
+.book .spine{position:absolute;left:0;top:0;bottom:0;width:7px;background:linear-gradient(90deg,rgba(0,0,0,.45),rgba(255,255,255,.08));z-index:3}
+.book .lock{position:absolute;top:12px;right:11px;width:24px;height:24px;z-index:4;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));transition:opacity .5s .8s,transform .5s .8s}
+.book .shackle{transition:d .45s var(--ease)}
+.book.unlocked .lock{opacity:0;transform:translateY(-8px)}
+.book .sheen{position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);background-size:250% 100%;background-position:150% 0;opacity:0;z-index:3}
+body.busy .book .sheen{opacity:1;animation:sheen 1.6s linear infinite}
+@keyframes sheen{to{background-position:-100% 0}}
+body.done .book{animation:none;transform:none;box-shadow:inset 6px 0 0 rgba(0,0,0,.25),0 30px 60px -16px rgba(255,55,95,.55)}
+body.done .bookwrap{animation:pop .6s var(--ease)}
+@keyframes pop{40%{transform:scale(1.08)}}
+
+.msg{font-size:15px;text-align:center;min-height:42px;line-height:1.4;color:rgba(255,255,255,.88);padding:0 18px;white-space:pre-line}
+.msg small{display:block;color:var(--mute);font-size:12.5px;margin-top:3px}
+.bar{width:78%;height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden;opacity:0;transition:opacity .3s}
+body.busy .bar,body.done .bar{opacity:1}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--a1,var(--blue)),var(--a2,var(--violet)));border-radius:inherit;transition:width .7s ease}
+body.done .bar i{background:linear-gradient(90deg,var(--green),#64d2ff)}
+.steps{display:flex;justify-content:space-between;width:78%;margin-top:-10px;opacity:0;transition:opacity .3s}
+body.busy .steps,body.done .steps,body.error .steps{opacity:1}
+.steps span{font-size:10.5px;font-variant:small-caps;text-transform:lowercase;letter-spacing:.07em;color:var(--faint);transition:color .3s}
+.steps span.now{color:#fff}
+.steps span.ok{color:rgba(255,255,255,.7)}
+
+/* estado: lámpara + versalitas, la lámpara solo se enciende si pide actuar */
+.st{display:flex;align-items:center;justify-content:center;gap:7px;font-size:11.5px;font-variant:small-caps;text-transform:lowercase;letter-spacing:.07em;color:var(--faint);min-height:16px}
+.st .lamp{width:7px;height:7px;border-radius:50%;box-shadow:inset 0 0 0 1.5px currentColor;opacity:.6}
+.st.on{color:var(--orange)}
+.st.on .lamp{background:var(--orange);box-shadow:0 0 0 3px rgba(255,159,10,.25);opacity:1;animation:pulse 1.2s ease-in-out infinite}
+.st.bad{color:var(--red)}
+.st.bad .lamp{background:var(--red);box-shadow:0 0 0 3px rgba(255,69,58,.25);opacity:1}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(255,159,10,0)}}
+
+/* botones */
+.acts{margin-top:14px;display:flex;flex-direction:column;gap:9px}
+.cta{font-size:16px;font-weight:600;border-radius:16px;padding:15px;background:#fff;color:var(--bg);transition:transform .15s,opacity .3s}
+.cta:active{transform:scale(.97)}
+.cta:disabled{opacity:.35;cursor:default}
+.row2{display:none;gap:9px}
+.row2 button{flex:1;font-size:14px;font-weight:600;border-radius:14px;padding:12px;background:rgba(255,255,255,.12);transition:background .2s}
+.row2 button:hover{background:rgba(255,255,255,.2)}
+body.done .row2,body.error .row2{display:flex}
+
+/* confeti */
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:40}
+
+/* hoja de ajustes */
+.veil{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;opacity:0;pointer-events:none;transition:opacity .3s}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;background:#1c1c1e;border-radius:26px 26px 0 0;padding:10px 20px 22px;transform:translateY(105%);transition:transform .45s var(--ease)}
+body.settings .veil{opacity:1;pointer-events:auto}
+body.settings .sheet{transform:none}
+.grab{width:38px;height:5px;border-radius:3px;background:#48484a;margin:0 auto 14px}
+.sheet h2{font-size:20px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.sheet h2 button{font-size:16px;font-weight:600;color:var(--blue)}
+.lbl{font-size:12px;color:#8e8e93;margin:14px 4px 7px}
+.group{background:#2c2c2e;border-radius:14px;overflow:hidden}
+.cell{display:flex;align-items:center;gap:10px;padding:12px 14px;font-size:14.5px;border-bottom:.5px solid #3a3a3c}
+.cell:last-child{border:0}
+.cell .grow{flex:1;min-width:0}
+.cell .grow small{display:block;font-size:12px;color:#8e8e93;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cell .link{color:var(--blue);font-weight:600;font-size:14px}
+.seg{display:flex;background:#2c2c2e;border-radius:10px;padding:2px;position:relative}
+.seg button{flex:1;padding:7px 0;font-size:13px;font-weight:600;border-radius:8px;position:relative;z-index:2;color:#ebebf5;transition:color .2s}
+.seg .knob{position:absolute;top:2px;bottom:2px;border-radius:8px;background:#636366;transition:left .3s var(--ease),width .3s var(--ease);z-index:1}
+.hint{font-size:12px;color:#8e8e93;margin:7px 4px 0;line-height:1.4}
+.sw{width:50px;height:30px;border-radius:15px;background:#39393d;position:relative;flex:none;transition:background .25s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.3);transition:transform .3s var(--ease)}
+.sw.on{background:var(--green)}
+.sw.on::after{transform:translateX(20px)}
+.checks{margin-top:14px}
+.checks .st{justify-content:flex-start;margin:4px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="idle">
+<div class="aur"><i></i><i></i><i></i></div>
+<canvas id="fx"></canvas>
+
+<div class="top pywebview-drag-region">
+  <button class="ctl" id="bAjustes" title="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+  <div class="island pywebview-drag-region"><i class="ring"></i><span class="txt" id="isl">Convirtiendo…</span></div>
+  <div class="right">
+    <button class="ctl" id="bMin" title="Minimizar"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12"/></svg></button>
+    <button class="ctl" id="bCerrar" title="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg></button>
+  </div>
+</div>
+
+<div class="content">
+  <div class="head pywebview-drag-region">
+    <div><h1>ACSM a PDF</h1><div class="sub">Tus libros, sin cadenas.</div></div>
+    <div class="count" id="cola">0 en cola</div>
+  </div>
+
+  <div class="glass" id="zona">
+    <div class="bookwrap">
+      <div class="book" id="libro">
+        <img id="portada" alt="">
+        <i class="spine"></i><i class="sheen"></i>
+        <svg class="lock" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path class="shackle" id="arco" d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        <b id="tit">Tu libro</b><span id="aut">Suelta aquí el .acsm</span>
+      </div>
+    </div>
+    <div class="msg" id="msg">Arrastra un .acsm a esta ventana<small>o haz clic para buscarlo</small></div>
+    <div class="bar"><i id="barra"></i></div>
+    <div class="steps" id="pasos"><span>ticket</span><span>adobe</span><span>drm</span><span>pdf</span></div>
+    <div class="st" id="estado"><i class="lamp"></i><span id="estadoTxt">listo</span></div>
+  </div>
+
+  <div class="acts">
+    <button class="cta" id="cta">Elegir archivo…</button>
+    <div class="row2"><button id="b2a">Mostrar en carpeta</button><button id="b2b">Convertir otro</button></div>
+  </div>
+</div>
+
+<div class="veil" id="velo"></div>
+<div class="sheet">
+  <div class="grab"></div>
+  <h2>Ajustes <button id="bHecho">Hecho</button></h2>
+
+  <div class="lbl">TAMAÑO DE PÁGINA</div>
+  <div class="seg" id="seg"><i class="knob"></i>
+    <button data-v="original">Original</button><button data-v="a4">A4</button><button data-v="a5">A5</button><button data-v="lector">Lector</button>
+  </div>
+  <div class="hint" id="segHint">Proporción de la portada del libro, como un libro impreso. Si el libro ya viene en PDF se guarda tal cual.</div>
+
+  <div class="lbl">GUARDAR</div>
+  <div class="group">
+    <div class="cell"><div class="grow">Carpeta<small id="carpeta">…</small></div><button class="link" id="bCarpeta">Cambiar</button></div>
+    <div class="cell"><div class="grow">Guardar también el EPUB<small>Sin protección, para lectores electrónicos</small></div><div class="sw" id="swEpub"></div></div>
+  </div>
+
+  <div class="lbl">WINDOWS</div>
+  <div class="group">
+    <div class="cell"><div class="grow">Abrir los .acsm con esta app<small>Doble clic en un ticket y se convierte solo</small></div><div class="sw" id="swAsoc"></div></div>
+  </div>
+
+  <div class="checks" id="checks"></div>
+  <div class="hint">La carpeta «datos» guarda tu autorización de Adobe. Haz una copia de seguridad: los libros descargados con ella solo se abren con ella. Y no la compartas: quien la tenga puede abrir tus libros.</div>
+  <div class="hint" id="version"></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const body=document.body;
+const PASOS=['ticket','adobe','drm','pdf'];
+const HINTS={original:'Proporción de la portada del libro, como un libro impreso. Si el libro ya viene en PDF se guarda tal cual.',a4:'Folio, 21 × 29,7 cm. Para imprimir o leer en pantalla grande.',a5:'Medio folio, 14,8 × 21 cm.',lector:'9 × 12,2 cm, para lectores de 6 pulgadas.'};
+let ajustes={}, ultimo=null, ocupado=false;
+
+function setState(s){body.classList.remove('idle','busy','done','error');body.classList.add(s)}
+function estado(txt,modo){const e=$('estado');e.classList.remove('on','bad');if(modo)e.classList.add(modo);$('estadoTxt').textContent=txt}
+function api(){return window.pywebview&&window.pywebview.api}
+
+function reset(){
+  setState('idle');body.classList.remove('attn');tenir(null);
+  const l=$('libro');l.classList.remove('cover','unlocked','flip');$('portada').removeAttribute('src');
+  $('tit').textContent='Tu libro';$('aut').textContent='Suelta aquí el .acsm';
+  $('arco').setAttribute('d','M8 11V8a4 4 0 0 1 8 0v3');
+  $('msg').innerHTML='Arrastra un .acsm a esta ventana<small>o haz clic para buscarlo</small>';
+  $('barra').style.width='0';[...$('pasos').children].forEach(s=>s.className='');
+  estado('listo');$('cta').textContent='Elegir archivo…';$('cta').disabled=false;
+}
+
+let paleta=null;
+function tenir(cols){
+  const r=document.documentElement.style;paleta=cols||null;
+  ['--a1','--a2','--a3'].forEach((v,i)=>cols?r.setProperty(v,cols[i]):r.removeProperty(v));
+}
+function ponerPortada(src){
+  if(!src||$('portada').getAttribute('src')===src)return;
+  const l=$('libro');$('portada').src=src;l.classList.remove('flip');void l.offsetWidth;l.classList.add('flip');
+  setTimeout(()=>l.classList.add('cover'),380);
+}
+
+window.evento=function(ev){
+  if(ev.tipo==='cola'){const c=$('cola');c.textContent=ev.pendientes+' en cola';c.classList.toggle('on',ev.pendientes>0);return}
+  if(ev.tipo==='inicio'){
+    ocupado=true;reset();setState('busy');$('cta').textContent='Convirtiendo…';$('cta').disabled=true;
+    $('tit').textContent=ev.nombre;$('aut').textContent='';$('msg').textContent='Preparando…';return}
+  if(ev.tipo==='progreso'){
+    setState('busy');
+    if(ev.titulo){$('tit').textContent=ev.titulo;$('aut').textContent=ev.autor||''}
+    if(ev.portada)ponerPortada(ev.portada);
+    if(ev.colores)tenir(ev.colores);
+    const i=PASOS.indexOf(ev.etapa);
+    [...$('pasos').children].forEach((s,k)=>s.className=k<i?'ok':(k===i?'now':''));
+    if(i>=2){$('libro').classList.add('unlocked');$('arco').setAttribute('d','M8 11V8a4 4 0 0 1 7.5-2')}
+    $('barra').style.width=Math.max(4,ev.pct)+'%';
+    $('msg').textContent=ev.msg;$('isl').textContent=ev.msg;
+    body.classList.toggle('attn',!!ev.atencion);
+    ev.atencion?estado('adobe necesita tu atención','on'):estado('en curso');
+    return}
+  if(ev.tipo==='hecho'){
+    ocupado=false;ultimo=ev;body.classList.remove('attn');setState('done');
+    if(ev.portada)ponerPortada(ev.portada);
+    if(ev.colores)tenir(ev.colores);
+    $('libro').classList.add('unlocked');
+    [...$('pasos').children].forEach(s=>s.className='ok');$('barra').style.width='100%';
+    $('msg').innerHTML='';$('msg').append(ev.titulo);
+    const sm=document.createElement('small');sm.textContent=`${ev.tamano_mb.toString().replace('.',',')} MB · ${ev.pagina}`+(ev.epub?' · EPUB también':'');$('msg').append(sm);
+    estado('hecho');$('cta').textContent='Abrir PDF';$('cta').disabled=false;$('b2a').textContent='Mostrar en carpeta';$('b2b').textContent='Convertir otro';
+    confeti();return}
+  if(ev.tipo==='error'){
+    ocupado=false;ultimo=null;body.classList.remove('attn');setState('error');
+    $('msg').textContent=ev.msg;estado(ev.atencion?'revisa adobe':'no se ha podido','bad');
+    $('cta').textContent='Probar otra vez';$('cta').disabled=false;$('b2a').textContent='Elegir otro';$('b2b').textContent='Ver detalles';
+    window._detalle=ev.detalle||ev.msg;window._reintentar=ev.ruta;return}
+};
+
+/* acciones */
+async function elegir(){const r=await api().elegir_archivo();if(r&&r.length)api().convertir(r)}
+$('zona').onclick=()=>{if(body.classList.contains('idle'))elegir()};
+$('cta').onclick=()=>{
+  if(body.classList.contains('done')&&ultimo)return api().abrir(ultimo.pdf);
+  if(body.classList.contains('error')&&window._reintentar)return api().convertir([window._reintentar]);
+  if(!ocupado)elegir();
+};
+$('b2a').onclick=()=>{if(body.classList.contains('done')&&ultimo)api().mostrar(ultimo.pdf);else{reset();elegir()}};
+$('b2b').onclick=()=>{if(body.classList.contains('done')){reset();elegir()}else alert(window._detalle)};
+$('bMin').onclick=()=>api().minimizar();
+$('bCerrar').onclick=()=>api().cerrar();
+
+/* arrastrar: Python recibe las rutas, aquí solo el aspecto */
+let dragN=0;
+addEventListener('dragenter',e=>{e.preventDefault();if(!ocupado){dragN++;body.classList.add('drag')}});
+addEventListener('dragleave',e=>{dragN=Math.max(0,dragN-1);if(!dragN)body.classList.remove('drag')});
+addEventListener('dragover',e=>e.preventDefault());
+addEventListener('drop',e=>{e.preventDefault();dragN=0;body.classList.remove('drag')});
+
+/* ajustes */
+function pintarSeg(){
+  const b=[...$('seg').querySelectorAll('button')],a=b.find(x=>x.dataset.v===(ajustes.tamano||'original'))||b[0],k=$('seg').querySelector('.knob');
+  k.style.left=a.offsetLeft+'px';k.style.width=a.offsetWidth+'px';$('segHint').textContent=HINTS[a.dataset.v];
+}
+function pintarAjustes(){
+  $('carpeta').textContent=ajustes.carpeta;$('swEpub').classList.toggle('on',!!ajustes.guardar_epub);$('swAsoc').classList.toggle('on',!!ajustes.asociado);pintarSeg();
+}
+function guardar(){api().guardar_ajustes(ajustes)}
+$('seg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ajustes.tamano=b.dataset.v;pintarSeg();guardar()});
+$('swEpub').onclick=()=>{ajustes.guardar_epub=!ajustes.guardar_epub;pintarAjustes();guardar()};
+$('swAsoc').onclick=async()=>{const r=await api().asociar(!ajustes.asociado);if(r.ok)ajustes.asociado=r.asociado;else alert(r.error);pintarAjustes()};
+$('bCarpeta').onclick=async()=>{const c=await api().elegir_carpeta();if(c){ajustes.carpeta=c;pintarAjustes();guardar()}};
+$('bAjustes').onclick=()=>{body.classList.add('settings');requestAnimationFrame(pintarSeg)};
+$('bHecho').onclick=$('velo').onclick=()=>body.classList.remove('settings');
+
+/* confeti */
+function confeti(){
+  const c=$('fx'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  const cols=paleta?[...paleta,'#fff','#ffd60a']:['#ff375f','#bf5af2','#0a84ff','#30d158','#ffd60a','#fff'];
+  const P=Array.from({length:140},()=>({x:c.width/2,y:c.height*.42,vx:(Math.random()-.5)*11,vy:-Math.random()*11-3,r:Math.random()*5+3,c:cols[Math.random()*cols.length|0],a:Math.random()*6,va:(Math.random()-.5)*.3,l:1}));
+  (function f(){x.clearRect(0,0,c.width,c.height);let vivo=0;
+    for(const p of P){p.vy+=.32;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;p.l-=.009;if(p.l>0&&p.y<c.height){vivo=1;x.save();x.globalAlpha=Math.max(0,p.l);x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()}}
+    if(vivo)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})();
+}
+
+/* arranque */
+window.addEventListener('pywebviewready',async()=>{
+  const ini=await api().estado_inicial();ajustes=ini.ajustes;pintarAjustes();
+  $('checks').innerHTML='';
+  for(const [nombre,txt,ok] of ini.comprobaciones){const d=document.createElement('div');d.className='st'+(ok?'':' bad');d.innerHTML='<i class="lamp"></i><span></span>';d.querySelector('span').textContent=nombre+' · '+txt;$('checks').append(d)}
+  $('version').textContent='Versión '+ini.version;
+  if(ini.comprobaciones.some(c=>!c[2]))estado('falta algo · mira ajustes','bad');
+});
+</script>
+</body>
+</html>

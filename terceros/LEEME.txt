@@ -1,0 +1,3 @@
+Código de terceros, sin modificar:
+  deacsm  = DeACSM / acsm-calibre-plugin v0.0.16 de Leseratte10 (GPL v3) - https://github.com/Leseratte10/acsm-calibre-plugin
+  dedrm   = DeDRM v10.0.9 de noDRM (GPL v3) - https://github.com/noDRM/DeDRM_tools

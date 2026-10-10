@@ -1,0 +1,17 @@
+﻿ACSM a PDF · cómo usarla
+https://github.com/cervandus/acsm-to-pdf
+
+1. Copia esta carpeta entera donde quieras: el escritorio, una memoria USB, otro ordenador.
+2. Abre «ACSM a PDF.exe». Si Windows avisa de que la app no está firmada: «Más información» > «Ejecutar de todas formas».
+3. Arrastra a la ventana el archivo .acsm que te da la tienda, o pulsa «Elegir archivo…».
+4. En unos 20 segundos tienes el PDF en Documentos\Libros PDF (se puede cambiar en Ajustes).
+
+Para que los .acsm se abran solos con doble clic en un ordenador: Ajustes > «Abrir los .acsm con esta app».
+
+No borres ni separes las carpetas «_internal» y «calibre»: la app las necesita.
+
+La carpeta «datos» se crea al convertir el primer libro y guarda tu autorización de Adobe:
+  - Haz copia de seguridad: los libros descargados con ella solo se abren con ella.
+  - No la compartas: quien la tenga puede abrir tus libros.
+
+Úsala solo con libros que hayas comprado, para tu uso personal.
