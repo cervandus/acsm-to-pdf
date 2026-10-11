@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/cervandus/acsm-to-pdf/releases/latest"><img src="https://img.shields.io/github/v/release/cervandus/acsm-to-pdf?label=versi%25C3%25B3n&color=5e5ce6" alt="versión"></a>
-  <a href="https://github.com/cervandus/acsm-to-pdf/releases"><img src="https://img.shields.io/github/downloads/cervandus/acsm-to-pdf/total?label=descargas&color=bf5af2" alt="descargas"></a>
+  <a href="https://github.com/cervandus/acsm-to-pdf/releases/latest"><img src="https://img.shields.io/github/v/release/cervandus/acsm-to-pdf?label=&color=5e5ce6" alt="versión"></a>
+  <a href="https://github.com/cervandus/acsm-to-pdf/releases"><img src="https://img.shields.io/github/downloads/cervandus/acsm-to-pdf/total?label=descargas&color=bf5af2&cacheSeconds=3600" alt="descargas"></a>
 </p>
 
 <p align="center">Windows 10 y 11 · portátil, no se instala · gratis y de código abierto</p>
